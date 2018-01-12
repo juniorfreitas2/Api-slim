@@ -3,6 +3,7 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use App\Models\Entity\User;
+use Firebase\JWT\JWT;
 
 //rota opcional
 $app->get('/edit[/{id}]', function($request, $response) {
@@ -29,9 +30,8 @@ $app->get('/user', function (Request $request, Response $response) use ($app) {
 });
 
 
-$app->get('/user/{id}', function (Request $request, Response $response) use ($app) {
+$app->get('/user/{id}', function (Request $request, Response $response, $args) use ($app) {
     $route = $request->getAttribute('route');
-
     $id = $route->getArgument('id');
     
     $entityManager = $this->get('em');
@@ -40,6 +40,10 @@ $app->get('/user/{id}', function (Request $request, Response $response) use ($ap
     
     $book = $booksRepository->find($id);        
     
+    if (!$book) {
+        throw new \Exception("User not Found", 404);
+    } 
+
     $return = $response->withJson($book, 200)
         ->withHeader('Content-type', 'application/json');
     return $return;
@@ -82,7 +86,12 @@ $app->put('/user/{id}', function (Request $request, Response $response) use ($ap
      */ 
     $entityManager = $this->get('em');
     $booksRepository = $entityManager->getRepository('App\Models\Entity\User');
-    $book = $booksRepository->find($id);   
+    $book = $booksRepository->find($id);  
+
+    if (!$book) {
+        throw new \Exception("User not Found", 404);
+    }
+
     /**
      * Atualiza e Persiste o Livro com os parâmetros recebidos no request
      */
@@ -102,9 +111,6 @@ $app->put('/user/{id}', function (Request $request, Response $response) use ($ap
 
 
 $app->delete('/user/{id}', function (Request $request, Response $response) use ($app) {
-    /**
-     * Pega o ID do livro informado na URL
-     */
     $route = $request->getAttribute('route');
     $id = $route->getArgument('id');
     /**
@@ -112,7 +118,12 @@ $app->delete('/user/{id}', function (Request $request, Response $response) use (
      */ 
     $entityManager = $this->get('em');
     $booksRepository = $entityManager->getRepository('App\Models\Entity\User');
-    $book = $booksRepository->find($id);   
+    $book = $booksRepository->find($id); 
+
+    if (!$book) {
+        throw new \Exception("User not Found", 404);
+    }
+
     /**
      * Remove a entidade
      */
@@ -121,4 +132,20 @@ $app->delete('/user/{id}', function (Request $request, Response $response) use (
     $return = $response->withJson(['msg' => "Deletando o usuário {$id}"], 204)
         ->withHeader('Content-type', 'application/json');
     return $return;
+});
+
+
+$app->get('/auth', function (Request $request, Response $response) use ($app) {
+    $key = $this->get("secretkey");
+    
+    $token = array(
+        "user" => "@fidelissauro",
+        "twitter" => "https://twitter.com/fidelissauro",
+        "github" => "https://github.com/msfidelis"
+    );
+    
+    $jwt = JWT::encode($token, $key);
+    
+    return $response->withJson(["auth-jwt" => $jwt], 200)
+        ->withHeader('Content-type', 'application/json');      
 });
