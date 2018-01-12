@@ -3,6 +3,7 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use App\Models\Entity\User;
+
 //rota opcional
 $app->get('/edit[/{id}]', function($request, $response) {
 	$id = $request->getAttribute('id') ?? 'id opcional';
@@ -13,7 +14,7 @@ $app->get('/edit[/{id}]', function($request, $response) {
 });
 
 
-// BOOKS
+// User
 $app->get('/user', function (Request $request, Response $response) use ($app) {
     
     $entityManager = $this->get('em');

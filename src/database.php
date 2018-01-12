@@ -3,7 +3,6 @@
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 
-$container = new \Slim\Container();
 $isDevMode = true;
 
 /**
@@ -28,9 +27,4 @@ $conn = array(
  */
 $entityManager = EntityManager::create($conn, $config);
 
-/**
- * Coloca o Entity manager dentro do container com o nome de em (Entity Manager)
- */
-$container['em'] = $entityManager;
-
-return $container;
+return $entityManager;

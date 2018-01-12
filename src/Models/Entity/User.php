@@ -35,12 +35,22 @@ class User {
         return $this->name;
     }
 
-    public function setName($name){
+    public function setName($name) {
+        
+        if (!$name && !is_string($name)) {
+            throw new \InvalidArgumentException("User name is required", 400);
+        }
+
         $this->name = $name;
         return $this;  
     }
 
     public function setPassword($password) {
+
+         if (!$password && !is_string($password)) {
+            throw new \InvalidArgumentException("password is required", 400);
+        }
+
         $this->password = $password;
         return $this;
     }
