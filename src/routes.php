@@ -5,153 +5,6 @@ use \Psr\Http\Message\ResponseInterface as Response;
 use App\Models\Entity\User;
 use Firebase\JWT\JWT;
 
-//rota opcional
-$app->get('/edit[/{id}]', function($request, $response) {
-	$id = $request->getAttribute('id') ?? 'id opcional';
-
-	//$response->getBody()->write("response writing");
-
-	return $id;
-});
-
-
-// User
-$app->get('/user', function (Request $request, Response $response) use ($app) {
-    
-    $entityManager = $this->get('em');
-
-    $booksRepository = $entityManager->getRepository('App\Models\Entity\User');
-    
-    $books = $booksRepository->findAll();
-    
-    $return = $response->withJson($books, 200)
-        ->withHeader('Content-type', 'application/json');
-    return $return;
-});
-
-
-$app->get('/user/{id}', function (Request $request, Response $response, $args) use ($app) {
-    $route = $request->getAttribute('route');
-    $id = $route->getArgument('id');
-    
-    $entityManager = $this->get('em');
-    
-    $booksRepository = $entityManager->getRepository('App\Models\Entity\User');
-    
-    $book = $booksRepository->find($id);        
-    
-    if (!$book) {
-        throw new \Exception("User not Found", 404);
-    } 
-
-    $return = $response->withJson($book, 200)
-        ->withHeader('Content-type', 'application/json');
-    return $return;
-    
-});
-
-
-$app->post('/user', function (Request $request, Response $response) use ($app) {
-   
-   $params = (object) $request->getParams();
-    /**
-     * Pega o Entity Manager do nosso Container
-     */
-    $entityManager = $this->get('em');
-    /**
-     * Instância da nossa Entidade preenchida com nossos parametros do post
-     */
-    $book = (new User())->setName($params->name)
-        ->setPassword($params->password);
-    
-    /**
-     * Persiste a entidade no banco de dados
-     */
-    $entityManager->persist($book);
-    $entityManager->flush();
-    $return = $response->withJson($book, 201)
-        ->withHeader('Content-type', 'application/json');
-    return $return;
-});
-
-
-$app->put('/user/{id}', function (Request $request, Response $response) use ($app) {
-   /**
-     * Pega o ID do livro informado na URL
-     */
-    $route = $request->getAttribute('route');
-    $id = $route->getArgument('id');
-    /**
-     * Encontra o Livro no Banco
-     */ 
-    $entityManager = $this->get('em');
-    $booksRepository = $entityManager->getRepository('App\Models\Entity\User');
-    $book = $booksRepository->find($id);  
-
-    if (!$book) {
-        throw new \Exception("User not Found", 404);
-    }
-
-    /**
-     * Atualiza e Persiste o Livro com os parâmetros recebidos no request
-     */
-    $book->setName($request->getParam('name'))
-        ->setPassword($request->getParam('password'));
-    /**
-     * Persiste a entidade no banco de dados
-     */
-    $entityManager->persist($book);
-    $entityManager->flush();        
-    
-    $return = $response->withJson($book, 200)
-        ->withHeader('Content-type', 'application/json');
-    return $return;
-
-});
-
-
-$app->delete('/user/{id}', function (Request $request, Response $response) use ($app) {
-    $route = $request->getAttribute('route');
-    $id = $route->getArgument('id');
-    /**
-     * Encontra o Livro no Banco
-     */ 
-    $entityManager = $this->get('em');
-    $booksRepository = $entityManager->getRepository('App\Models\Entity\User');
-    $book = $booksRepository->find($id); 
-
-    if (!$book) {
-        throw new \Exception("User not Found", 404);
-    }
-
-    /**
-     * Remove a entidade
-     */
-    $entityManager->remove($book);
-    $entityManager->flush(); 
-    $return = $response->withJson(['msg' => "Deletando o usuário {$id}"], 204)
-        ->withHeader('Content-type', 'application/json');
-    return $return;
-});
-
-
-$app->get('/auth', function (Request $request, Response $response) use ($app) {
-    $key = $this->get("secretkey");
-    
-    $token = array(
-        "user" => "@fidelissauroo",
-        "twitter" => "https://twitter.com/fidelissauro",
-        "github" => "https://github.com/msfidelis"
-    );
-    
-    $jwt = JWT::encode($token, $key);
-    
-    return $response->withJson(["auth-jwt" => $jwt], 200)
-        ->withHeader('Content-type', 'application/json');      
-});
-
-
-// Novo routes
 $app->group('/v1', function() {
     $this->group('/user', function() {
         $this->get('', '\App\Controllers\UserController:listUser');
@@ -163,11 +16,10 @@ $app->group('/v1', function() {
         $this->get('/{id:[0-9]+}', '\App\Controllers\UserController:viewUser');
         $this->put('/{id:[0-9]+}', '\App\Controllers\UserController:updateUser');
         $this->delete('/{id:[0-9]+}', '\App\Controllers\UserController:deleteUser');
-
-        $this->group('/auth', function() {
-        $this->get('', \App\Controllers\AuthController::class);
     });
 
+    $this->group('/auth', function() {
+        $this->get('', \App\Controllers\AuthController::class);
     });
 
 });

@@ -117,7 +117,6 @@ class UserController {
         $entityManager = $this->container->get('em');
         $userRepository = $entityManager->getRepository('App\Models\Entity\User');
         $user = $userRepository->find($id);   
-
         /**
          * Verifica se existe um usuario com a ID informada
          */
